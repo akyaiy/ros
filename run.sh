@@ -7,4 +7,10 @@ if [[ ! -f "$IMAGE_PATH" ]]; then
 	exit 1
 fi
 
-exec qemu-system-x86_64 -serial stdio -drive format=raw,file="$IMAGE_PATH"
+com="cargo build"
+echo "Running: $com"
+$com
+
+com="qemu-system-x86_64 -serial stdio -drive format=raw,file="$IMAGE_PATH""
+echo "Running: $com"
+$com
