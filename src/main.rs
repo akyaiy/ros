@@ -10,7 +10,7 @@ use ros::{print, println};
 
 #[no_mangle]
 pub extern "C" fn _start() {
-    println!("ROS v0.1");
+    println!("\t\tROS v0.1");
     
     #[cfg(test)]
     test_main();

@@ -80,6 +80,13 @@ impl Writer {
 	pub fn write_byte(&mut self, byte: u8) {
 		match byte {
 			b'\n' => self.new_line(),
+			b'\t' => {
+				let tab_width = 4;
+				let spaces = tab_width - (self.column_position % tab_width);
+				for _ in 0..spaces {
+					self.write_byte(b' ');
+				}
+			},
 			byte => {
 				if self.column_position >= BUFFER_WIDTH {
 					self.new_line();
@@ -105,7 +112,7 @@ impl Writer {
 	pub fn write_string(&mut self, s: &str) {
 		for byte in s.bytes() {
 			match byte {
-				0x20..=0x7e | b'\n' => self.write_byte(byte),
+				0x20..=0x7e | b'\n' | b'\t' => self.write_byte(byte),
 				_ => self.write_byte(0xfe),
 			}
 		}
