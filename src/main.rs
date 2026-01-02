@@ -6,8 +6,6 @@ mod vga_buffer;
 use core::panic::PanicInfo;
 use core::arch::asm;
 
-use core::fmt::Write;
-
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
     unsafe {
