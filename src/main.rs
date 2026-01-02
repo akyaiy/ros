@@ -24,7 +24,9 @@ fn panic(_info: &PanicInfo) -> ! {
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    println!("hmmm");
+    for i in 1..30 {
+        println!("hmmm {}", i);
+    }
     panic!("panica bum bum '{}'", 123);
     loop {}
 }

@@ -50,6 +50,7 @@ struct Buffer {
 }
 
 pub struct Writer {
+	row_position: usize,
 	column_position: usize,
 	color_code: ColorCode,
 	buffer: &'static mut Buffer
@@ -58,6 +59,7 @@ pub struct Writer {
 lazy_static! {
 	pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
 			column_position: 0,
+			row_position: 0,
 			color_code: ColorCode::new(Color::White, Color::Black),
 			buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
 	});
@@ -71,8 +73,12 @@ impl Writer {
 				if self.column_position >= BUFFER_WIDTH {
 					self.new_line();
 				}
-
-				let row = BUFFER_HEIGHT - 1;
+				if self.row_position >= BUFFER_HEIGHT {
+					self.scroll_screen(1);
+					self.row_position = BUFFER_HEIGHT - 1;
+				}
+				
+				let row = self.row_position;
 				let col = self.column_position;
 
 				let color_code = self.color_code;
@@ -95,13 +101,7 @@ impl Writer {
 	}
 
 	fn new_line(&mut self) {
-		for row in 1..BUFFER_HEIGHT {
-			for col in 0..BUFFER_WIDTH {
-				let character = self.buffer.chars[row][col].read();
-				self.buffer.chars[row - 1][col].write(character);
-			}
-		}
-		self.clear_row(BUFFER_HEIGHT - 1);
+		self.row_position += 1;
 		self.column_position = 0;
 	}
 
@@ -113,6 +113,18 @@ impl Writer {
 		for col in 0..BUFFER_WIDTH {
 			self.buffer.chars[row][col].write(blank);
 		}
+	}
+
+	fn scroll_screen(&mut self, steps: usize) {
+		for _ in 0..steps {
+			for row in 1..BUFFER_HEIGHT {
+				for col in 0..BUFFER_WIDTH {
+					let character = self.buffer.chars[row][col].read();
+					self.buffer.chars[row - 1][col].write(character);
+				}
+			}
+		}
+		self.clear_row(BUFFER_HEIGHT - steps);
 	}
 }
 
