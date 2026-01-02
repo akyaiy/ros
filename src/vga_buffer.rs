@@ -162,3 +162,11 @@ pub fn _print(args: fmt::Arguments) {
 	use core::fmt::Write;
 	WRITER.lock().write_fmt(args).unwrap();
 }
+
+// TESTS
+#[test_case]
+fn test_println_many() {
+	for i in 0..148 {
+		println!("output {}", i)
+	}
+}

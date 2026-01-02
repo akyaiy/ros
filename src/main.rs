@@ -83,10 +83,3 @@ where
         serial_println!("[ok]")
     }
 }
-
-#[test_case]
-fn test_println_many() {
-    for i in 0..148 {
-        println!("output {}", i)
-    }
-}
