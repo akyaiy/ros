@@ -170,3 +170,19 @@ fn test_println_many() {
 		println!("output {}", i)
 	}
 }
+
+#[test_case]
+fn test_println_output() {
+	let s = "String in one line";
+	println!("{}", s);
+	let writer = WRITER.lock();
+	let row = if writer.row_position > 0 {
+		writer.row_position - 1
+	} else {
+		0
+	};
+	for (i, c) in s.chars().enumerate() {
+		let screen_char = writer.buffer.chars[row][i].read();
+		assert_eq!(char::from(screen_char.ascii_character), c)
+	}
+}
