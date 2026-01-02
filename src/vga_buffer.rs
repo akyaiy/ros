@@ -3,6 +3,9 @@ use core::fmt;
 use lazy_static::lazy_static;
 use spin::Mutex;
 
+// for disabling default cursor
+use x86_64::instructions::port::Port;
+
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -31,6 +34,14 @@ struct ColorCode(u8);
 
 impl ColorCode {
 	fn new(foreground: Color, background: Color) -> ColorCode {
+		let mut addr_port = Port::<u8>::new(0x3D4);
+		let mut data_port = Port::<u8>::new(0x3D5);
+
+		unsafe {
+			addr_port.write(0x0A);
+			data_port.write(0x20);
+		}
+
 		ColorCode((background as u8) << 4 | (foreground as u8))
 	}
 }
