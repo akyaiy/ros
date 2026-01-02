@@ -15,18 +15,18 @@ macro_rules! klog {
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-//     print!(r#"
-//   _____   ____   _____ 
-//  |  __ \ / __ \ / ____|
-//  | |__) | |  | | (___  
-//  |  _  /| |  | |\___ \ 
-//  | | \ \| |__| |____) |
-//  |_|  \_\\____/|_____/ 
+    print!(r#"
+  _____   ____   _____ 
+ |  __ \ / __ \ / ____|
+ | |__) | |  | | (___  
+ |  _  /| |  | |\___ \ 
+ | | \ \| |__| |____) |
+ |_|  \_\\____/|_____/ 
                        
-//         ROS v0.1
+        ROS v0.1
 
-// "#);
-//     /* ***************************************** */
+"#);
+    /* ***************************************** */
 
     klog!("Initializating");
     ros::init();
@@ -41,18 +41,9 @@ pub extern "C" fn _start() -> ! {
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
-    use core::arch::asm;
-    unsafe {
-        asm!(
-            "cli"
-        );
-    }
+    x86_64::instructions::interrupts::disable();
     print!("KERNEL PANIC: {}", _info);
-    unsafe {
-        asm!(
-            "hlt"
-        );
-    }
+    x86_64::instructions::hlt();
     loop {}
 }
 
