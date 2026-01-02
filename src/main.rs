@@ -13,7 +13,7 @@ fn panic(_info: &PanicInfo) -> ! {
             "cli"
         );
     }
-    print!("KERNEL PANIC: {}", _info.message());
+    print!("KERNEL PANIC: {}", _info);
     unsafe {
         asm!(
             "hlt"
