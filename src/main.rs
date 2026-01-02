@@ -10,6 +10,15 @@ use ros::{print, println};
 
 #[no_mangle]
 pub extern "C" fn _start() {
+    print!(r#"
+ _____   ____   _____ 
+ |  __ \ / __ \ / ____|
+ | |__) | |  | | (___  
+ |  _  /| |  | |\___ \ 
+ | | \ \| |__| |____) |
+ |_|  \_\\____/|_____/ 
+                       
+"#);
     println!("\t\tROS v0.1");
     
     #[cfg(test)]
