@@ -71,7 +71,7 @@ lazy_static! {
 	pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
 			column_position: 0,
 			row_position: 0,
-			color_code: ColorCode::new(Color::White, Color::Black),
+			color_code: ColorCode::new(Color::LightGray, Color::Black),
 			buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
 	});
 }
