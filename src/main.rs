@@ -15,7 +15,7 @@ fn panic(_info: &PanicInfo) -> ! {
             "cli"
         );
     }
-    write!(vga_buffer::WRITER.lock(), "KERNEL PANIC: {}", _info.message()).unwrap();
+    print!("KERNEL PANIC: {}", _info.message());
     unsafe {
         asm!(
             "hlt"
@@ -26,7 +26,7 @@ fn panic(_info: &PanicInfo) -> ! {
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    write!(vga_buffer::WRITER.lock(), "1\n").unwrap();
+    println!("hmmm");
     panic!("panica bum bum '{}'", 123);
     loop {}
 }
