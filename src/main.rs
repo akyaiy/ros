@@ -8,21 +8,34 @@ use core::panic::PanicInfo;
 #[allow(unused)]
 use ros::{print, println};
 
+#[macro_export]
+macro_rules! klog {
+    ($($arg:tt)*) => (ros::print!(" :: {}\n", format_args!($($arg)*)));
+}
+
 #[no_mangle]
-pub extern "C" fn _start() {
-    print!(r#"
- _____   ____   _____ 
- |  __ \ / __ \ / ____|
- | |__) | |  | | (___  
- |  _  /| |  | |\___ \ 
- | | \ \| |__| |____) |
- |_|  \_\\____/|_____/ 
+pub extern "C" fn _start() -> ! {
+//     print!(r#"
+//   _____   ____   _____ 
+//  |  __ \ / __ \ / ____|
+//  | |__) | |  | | (___  
+//  |  _  /| |  | |\___ \ 
+//  | | \ \| |__| |____) |
+//  |_|  \_\\____/|_____/ 
                        
-"#);
-    println!("\t\tROS v0.1");
-    
+//         ROS v0.1
+
+// "#);
+//     /* ***************************************** */
+
+    klog!("Initializating");
+    ros::init();
+
+    /* ***************************************** */
+    x86_64::instructions::interrupts::int3();
     #[cfg(test)]
     test_main();
+    loop {}
 }
 
 #[cfg(not(test))]
