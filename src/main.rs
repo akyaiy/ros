@@ -4,6 +4,8 @@
 #![test_runner(ros::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+static DEBUG: bool = false;
+
 use core::panic::PanicInfo;
 #[allow(unused)]
 use ros::{print, println};
@@ -32,7 +34,11 @@ pub extern "C" fn _start() -> ! {
     ros::init();
 
     /* ***************************************** */
-    x86_64::instructions::interrupts::int3();
+
+    unsafe {
+        *(0xdeadbeef as *mut u64) = 42
+    }
+    
     #[cfg(test)]
     test_main();
     loop {}
@@ -40,9 +46,13 @@ pub extern "C" fn _start() -> ! {
 
 #[cfg(not(test))]
 #[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
+fn panic(info: &PanicInfo) -> ! {
     x86_64::instructions::interrupts::disable();
-    print!("KERNEL PANIC: {}", _info);
+    if DEBUG {
+        print!("KERNEL PANIC: {}", info);
+    } else {
+        print!("KERNEL PANIC: {}", info.message());
+    }
     x86_64::instructions::hlt();
     loop {}
 }
