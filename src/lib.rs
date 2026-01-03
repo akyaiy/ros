@@ -51,14 +51,14 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     serial_println!("[failed]\n");
     serial_println!("Error: {}\n", info);
     qemu::exit_qemu(qemu::QemuExitCode::Failed);
-    loop {}
+    hlt_loop();
 }
 
 #[cfg(test)]
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
     test_main();
-    loop {}
+    hlt_loop();
 }
 
 #[cfg(test)]
@@ -67,3 +67,42 @@ fn panic(info: &PanicInfo) -> ! {
     test_panic_handler(info)
 }
 
+#[macro_export]
+macro_rules! klog {
+    ($($arg:tt)*) => (ros::print!(" :: {}\n", format_args!($($arg)*)));
+}
+
+#[macro_export]
+macro_rules! trace_execution {
+    ($name:expr, $body:block) => {{
+        klog!("[ {} ]", $name);
+        let result = { $body };
+        match &result {
+            Ok(_) => klog!("[ {} ] done", $name),
+            Err(e) => klog!("[ {} ] error: {:?}", $name, e),
+        };
+    }};
+}
+
+#[macro_export]
+macro_rules! ok {
+    () => {
+        Ok::<(), ()>(())
+    };
+}
+
+#[macro_export]
+macro_rules! err {
+    () => {
+        Err::<(), ()>(())
+    };
+    ($e:expr) => {
+        Err::<(), _>($e)
+    };
+}
+
+pub fn hlt_loop() -> ! {
+    loop {
+        x86_64::instructions::hlt();
+    }
+}

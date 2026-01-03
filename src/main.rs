@@ -8,41 +8,7 @@ static DEBUG: bool = false;
 
 use core::panic::PanicInfo;
 #[allow(unused)]
-use ros::{print, println};
-
-#[macro_export]
-macro_rules! klog {
-    ($($arg:tt)*) => (ros::print!(" :: {}\n", format_args!($($arg)*)));
-}
-
-#[macro_export]
-macro_rules! trace_execution {
-    ($name:expr, $body:block) => {{
-        klog!("[ {} ]", $name);
-        let result = { $body };
-        match &result {
-            Ok(_) => klog!("[ {} ] done", $name),
-            Err(e) => klog!("[ {} ] error: {:?}", $name, e),
-        };
-    }};
-}
-
-#[macro_export]
-macro_rules! ok {
-    () => {
-        Ok::<(), ()>(())
-    };
-}
-
-#[macro_export]
-macro_rules! err {
-    () => {
-        Err::<(), ()>(())
-    };
-    ($e:expr) => {
-        Err::<(), _>($e)
-    };
-}
+use ros::{err, hlt_loop, klog, ok, print, println, trace_execution};
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
@@ -60,18 +26,19 @@ pub extern "C" fn _start() -> ! {
 "#
     );
     /* ***************************************** */
-    trace_execution!("Initialization", {
+    ros::trace_execution!("Initialization", {
         ros::init();
         ok!()
     });
 
     /* ***************************************** */
-
+    use core::arch::asm;
+    unsafe {
+        asm!("mov qword ptr [0xDEADBEEF], 0x42",);
+    }
     #[cfg(test)]
     test_main();
-    loop {
-        print!("-")
-    }
+    ros::hlt_loop();
 }
 
 #[cfg(not(test))]
@@ -84,7 +51,7 @@ fn panic(info: &PanicInfo) -> ! {
         print!("KERNEL PANIC: '{}'", info.message());
     }
     x86_64::instructions::hlt();
-    loop {}
+    ros::hlt_loop();
 }
 
 #[cfg(test)]
@@ -92,5 +59,5 @@ fn panic(info: &PanicInfo) -> ! {
 fn panic(info: &PanicInfo) -> ! {
     ros::test_panic_handler(info);
     #[allow(unreachable_code)]
-    loop {}
+    ros::hlt_loop();
 }
