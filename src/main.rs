@@ -69,7 +69,9 @@ pub extern "C" fn _start() -> ! {
 
     #[cfg(test)]
     test_main();
-    loop {}
+    loop {
+        print!("-")
+    }
 }
 
 #[cfg(not(test))]
