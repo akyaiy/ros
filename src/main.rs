@@ -54,7 +54,6 @@ pub extern "C" fn _start() -> ! {
 
 "#);
     /* ***************************************** */
-
     trace_execution!("Initialization", {
         ros::init();
         ok!()
