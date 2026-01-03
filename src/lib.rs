@@ -7,12 +7,16 @@
 #![allow(unsafe_code)]
 
 use core::panic::PanicInfo;
+
 pub mod interrupts;
+pub mod gdt;
+
 pub mod qemu;
 pub mod serial;
 pub mod vga_buffer;
 
 pub fn init() {
+	gdt::init();
 	interrupts::init_idt();
 }
 

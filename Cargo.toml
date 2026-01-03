@@ -25,3 +25,9 @@ test-args = [
 #run-args = ["-cpu", "host", "-serial", "stdio"]
 test-success-exit-code = 33
 test-timeout = 30
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"

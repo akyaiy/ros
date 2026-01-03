@@ -15,6 +15,31 @@ macro_rules! klog {
     ($($arg:tt)*) => (ros::print!(" :: {}\n", format_args!($($arg)*)));
 }
 
+#[macro_export]
+macro_rules! trace_execution {
+    ($name:expr, $body:block) => {{
+        klog!("[ {} ]", $name);
+        let result = {
+            $body
+        };
+        match &result {
+            Ok(_) => klog!("[ {} ] done", $name),
+            Err(e) => klog!("[ {} ] error: {:?}", $name, e)
+        };
+    }};
+}
+
+#[macro_export]
+macro_rules! ok {
+    () => { Ok::<(), ()>(()) };
+}
+
+#[macro_export]
+macro_rules! err {
+    () => { Err::<(), ()>(()) };
+    ($e:expr) => { Err::<(), _>($e) };
+}
+
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     print!(r#"
@@ -30,15 +55,17 @@ pub extern "C" fn _start() -> ! {
 "#);
     /* ***************************************** */
 
-    klog!("Initializating");
-    ros::init();
+    trace_execution!("Initialization", {
+        ros::init();
+        ok!()
+    });
 
     /* ***************************************** */
 
-    unsafe {
-        *(0xdeadbeef as *mut u64) = 42
+    fn so() {
+        so()
     }
-    
+    so();
     #[cfg(test)]
     test_main();
     loop {}
@@ -49,9 +76,9 @@ pub extern "C" fn _start() -> ! {
 fn panic(info: &PanicInfo) -> ! {
     x86_64::instructions::interrupts::disable();
     if DEBUG {
-        print!("KERNEL PANIC: {}", info);
+        print!("KERNEL PANIC: '{}'", info);
     } else {
-        print!("KERNEL PANIC: {}", info.message());
+        print!("KERNEL PANIC: '{}'", info.message());
     }
     x86_64::instructions::hlt();
     loop {}
