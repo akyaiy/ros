@@ -19,30 +19,35 @@ macro_rules! klog {
 macro_rules! trace_execution {
     ($name:expr, $body:block) => {{
         klog!("[ {} ]", $name);
-        let result = {
-            $body
-        };
+        let result = { $body };
         match &result {
             Ok(_) => klog!("[ {} ] done", $name),
-            Err(e) => klog!("[ {} ] error: {:?}", $name, e)
+            Err(e) => klog!("[ {} ] error: {:?}", $name, e),
         };
     }};
 }
 
 #[macro_export]
 macro_rules! ok {
-    () => { Ok::<(), ()>(()) };
+    () => {
+        Ok::<(), ()>(())
+    };
 }
 
 #[macro_export]
 macro_rules! err {
-    () => { Err::<(), ()>(()) };
-    ($e:expr) => { Err::<(), _>($e) };
+    () => {
+        Err::<(), ()>(())
+    };
+    ($e:expr) => {
+        Err::<(), _>($e)
+    };
 }
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    print!(r#"
+    print!(
+        r#"
   _____   ____   _____ 
  |  __ \ / __ \ / ____|
  | |__) | |  | | (___  
@@ -52,7 +57,8 @@ pub extern "C" fn _start() -> ! {
                        
         ROS v0.1
 
-"#);
+"#
+    );
     /* ***************************************** */
     trace_execution!("Initialization", {
         ros::init();
@@ -61,10 +67,6 @@ pub extern "C" fn _start() -> ! {
 
     /* ***************************************** */
 
-    fn so() {
-        so()
-    }
-    so();
     #[cfg(test)]
     test_main();
     loop {}
@@ -86,8 +88,7 @@ fn panic(info: &PanicInfo) -> ! {
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-	ros::test_panic_handler(info);
+    ros::test_panic_handler(info);
     #[allow(unreachable_code)]
-	loop {}
+    loop {}
 }
-
