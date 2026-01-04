@@ -6,36 +6,44 @@
 
 static DEBUG: bool = false;
 
+use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 #[allow(unused)]
 use ros::{err, hlt_loop, klog, ok, print, println, trace_execution};
 
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
-    print!(
-        r#"
-  _____   ____   _____ 
- |  __ \ / __ \ / ____|
- | |__) | |  | | (___  
- |  _  /| |  | |\___ \ 
- | | \ \| |__| |____) |
- |_|  \_\\____/|_____/ 
-                       
-        ROS v0.1
+entry_point!(kernel_main);
 
-"#
-    );
+fn kernel_main(boot_info: &'static BootInfo) -> ! {
+    use ros::memory::active_level_4_table;
+    use ros::memory::translate_addr;
+    use x86_64::structures::paging::PageTable;
+    use x86_64::VirtAddr;
+
+    //    crate::print_banner!();
     /* ***************************************** */
     ros::trace_execution!("Initialization", {
         ros::init();
+
+        let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
+
+        let addresses = [
+            0xb8000,
+            0x201008,
+            0x0100_0020_1a10,
+            boot_info.physical_memory_offset,
+        ];
+
+        for &address in &addresses {
+            let virt = VirtAddr::new(address);
+            let phys = unsafe { translate_addr(virt, phys_mem_offset) };
+            klog!("{:?} -> {:?}", virt, phys)
+        }
+
         ok!()
     });
 
     /* ***************************************** */
-    use core::arch::asm;
-    unsafe {
-        asm!("mov qword ptr [0xDEADBEEF], 0x42",);
-    }
+
     #[cfg(test)]
     test_main();
     ros::hlt_loop();
@@ -60,4 +68,23 @@ fn panic(info: &PanicInfo) -> ! {
     ros::test_panic_handler(info);
     #[allow(unreachable_code)]
     ros::hlt_loop();
+}
+
+#[macro_export]
+macro_rules! print_banner {
+    () => {
+        print!(
+        r#"
+  _____   ____   _____ 
+ |  __ \ / __ \ / ____|
+ | |__) | |  | | (___  
+ |  _  /| |  | |\___ \ 
+ | | \ \| |__| |____) |
+ |_|  \_\\____/|_____/ 
+                       
+        ROS v0.1
+
+"#
+        );
+    };
 }

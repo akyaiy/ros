@@ -11,7 +11,7 @@ lazy_static! {
 }
 
 #[doc(hidden)]
-pub fn _print(args: ::core::fmt::Arguments) {
+pub fn _print(args: core::fmt::Arguments) {
     use core::fmt::Write;
     use x86_64::instructions::interrupts;
 
@@ -36,4 +36,3 @@ macro_rules! serial_println {
 	($fmt:expr) => ($crate::serial_print!(concat!($fmt, "\n")));
 	($fmt:expr, $($arg:tt)*) => ($crate::serial_print!(concat!($fmt, "\n"), $($arg)*));
 }
-
