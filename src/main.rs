@@ -14,10 +14,8 @@ use ros::{err, hlt_loop, klog, ok, print, println, trace_execution};
 entry_point!(kernel_main);
 
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
-    use ros::memory::active_level_4_table;
-    use ros::memory::translate_addr;
-    use x86_64::structures::paging::PageTable;
-    use x86_64::VirtAddr;
+    use ros::memory;
+    use x86_64::{structures::paging::Translate, VirtAddr};
 
     //    crate::print_banner!();
     /* ***************************************** */
@@ -25,6 +23,8 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
         ros::init();
 
         let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
+
+        let mapper = unsafe { memory::init(phys_mem_offset) };
 
         let addresses = [
             0xb8000,
@@ -35,7 +35,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
         for &address in &addresses {
             let virt = VirtAddr::new(address);
-            let phys = unsafe { translate_addr(virt, phys_mem_offset) };
+            let phys = mapper.translate_addr(virt);
             klog!("{:?} -> {:?}", virt, phys)
         }
 
